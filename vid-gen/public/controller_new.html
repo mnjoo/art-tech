@@ -14,54 +14,56 @@
     <input id="searchInput"
            class="flex-1 rounded-xl border px-4 py-2 shadow-sm focus:outline-none"
            type="text" placeholder="Search YouTube or TikTok…" />
-
     <select id="platformSelect"
             class="rounded-xl border px-3 py-2 shadow-sm focus:outline-none">
       <option value="random">Random</option>
       <option value="youtube">YouTube only</option>
       <option value="tiktok">TikTok only</option>
     </select>
-
     <button onclick="sendSearch()"
             class="rounded-xl bg-blue-600 text-white px-5 py-2 font-semibold shadow hover:bg-blue-700">
       Go
     </button>
   </div>
 
+  <!-- ── comment input ───────────────────────────────────────────────────── -->
+  <div class="w-full max-w-4xl flex gap-3">
+    <input id="commentInput"
+           class="flex-1 rounded-xl border px-4 py-2 shadow-sm focus:outline-none"
+           type="text" placeholder="Leave a comment…" />
+    <button onclick="sendComment()"
+            class="rounded-xl bg-green-600 text-white px-5 py-2 font-semibold shadow hover:bg-green-700">
+      Comment
+    </button>
+  </div>
+
   <!-- ── pinterest-style grid of 7 channels ─────────────────────────────── -->
   <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-4xl">
-
-    <!-- Repeat ↓↓↓.  Each needs a cover.jpg in public/media/channelN/ -->
+    <!-- Each tile needs a cover.jpg in public/media/channelN/ -->
     <button onclick="sendLink('channel1')" class="chan-tile">
       <img src="/media/channel1/cover.jpg" class="chan-img" /><span class="chan-label">Channel&nbsp;1</span>
     </button>
-
     <button onclick="sendLink('channel2')" class="chan-tile">
       <img src="/media/channel2/cover.jpg" class="chan-img" /><span class="chan-label">Channel&nbsp;2</span>
     </button>
-
     <button onclick="sendLink('channel3')" class="chan-tile">
       <img src="/media/channel3/cover.jpg" class="chan-img" /><span class="chan-label">Channel&nbsp;3</span>
     </button>
-
     <button onclick="sendLink('channel4')" class="chan-tile">
       <img src="/media/channel4/cover.jpg" class="chan-img" /><span class="chan-label">Channel&nbsp;4</span>
     </button>
-
     <button onclick="sendLink('channel5')" class="chan-tile">
       <img src="/media/channel5/cover.jpg" class="chan-img" /><span class="chan-label">Channel&nbsp;5</span>
     </button>
-
     <button onclick="sendLink('channel6')" class="chan-tile">
       <img src="/media/channel6/cover.jpg" class="chan-img" /><span class="chan-label">Channel&nbsp;6</span>
     </button>
-
     <button onclick="sendLink('channel7')" class="chan-tile">
       <img src="/media/channel7/cover.jpg" class="chan-img" /><span class="chan-label">Channel&nbsp;7</span>
     </button>
   </div>
 
-  <!-- ── tiny tailwind helpers (avoid repeating classes) ────────────────── -->
+  <!-- ── Tailwind helpers ────────────────────────────────────────────────── -->
   <style>
     .chan-tile  { @apply relative group rounded-2xl overflow-hidden shadow; }
     .chan-img   { @apply h-40 w-full object-cover group-hover:scale-105 transition; }
@@ -74,25 +76,28 @@
   <script>
     const socket = io();
 
-    /* ── channels ───────────────────────────────────────────────────────── */
     function sendLink(channelName) {
       socket.emit('link-clicked', channelName);
       console.log('[controller] clicked:', channelName);
     }
 
-    /* ── search (random / forced YouTube / forced TikTok) ───────────────── */
     function sendSearch() {
       const query = document.getElementById('searchInput').value.trim();
       if (!query) return;
-
-      const mode = document.getElementById('platformSelect').value;
-      let platform = mode;
-      if (mode === 'random') {
-        platform = Math.random() < 0.5 ? 'youtube' : 'tiktok';
-      }
-
+      let mode = document.getElementById('platformSelect').value;
+      let platform = mode === 'random'
+        ? (Math.random() < 0.5 ? 'youtube' : 'tiktok')
+        : mode;
       socket.emit('search-query', { query, platform });
       console.log('[controller] search:', query, platform);
+    }
+
+    function sendComment() {
+      const txt = document.getElementById('commentInput').value.trim();
+      if (!txt) return;
+      socket.emit('new-comment', txt);
+      document.getElementById('commentInput').value = '';
+      console.log('[controller] new-comment:', txt);
     }
   </script>
 </body>

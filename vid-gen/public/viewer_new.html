@@ -5,6 +5,15 @@
   <title>Viewer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <style>
+    @keyframes fade-in-out {
+      0%   { opacity: 0; transform: translateY(20px); }
+      10%  { opacity: 1; transform: translateY(0); }
+      90%  { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+    .animate-fade { animation: fade-in-out 5s ease-in-out forwards; }
+  </style>
 </head>
 
 <body class="bg-black flex items-center justify-center h-screen">
@@ -13,28 +22,27 @@
   <script>
     const socket    = io();
     const container = document.getElementById('media-container');
-    const clear     = () => container.innerHTML = '';
+    const clearAll  = () => container.innerHTML = '';
 
-    /* ---------- single image ------------------------------------------------ */
-    socket.on('media-file', (url) => {
-      clear();
+    /* ── single image event ─────────────────────────────────────────────── */
+    socket.on('media-file', url => {
+      clearAll();
       const img = document.createElement('img');
       img.src = url;
       img.className = 'max-h-screen max-w-full';
       container.appendChild(img);
     });
 
-    /* ---------- slideshow array -------------------------------------------- */
+    /* ── slideshow array event ────────────────────────────────────────── */
     let list = [], idx = 0, timer;
-    socket.on('media-files', (files) => {
+    socket.on('media-files', files => {
       list = files; idx = 0; nextSlide();
     });
-
     function nextSlide() {
       if (!list.length) return;
-      clear();
+      clearAll();
       const url = list[idx];
-      const node = document.createElement(url.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'img');
+      const node = document.createElement(/\.(mp4|webm|ogg)$/i.test(url) ? 'video' : 'img');
       node.src = url;
       if (node.tagName === 'VIDEO') { node.autoplay = true; node.controls = false; }
       node.className = 'max-h-screen max-w-full';
@@ -44,25 +52,23 @@
       timer = setTimeout(nextSlide, 5000);
     }
 
-    /* ---------- search embed ----------------------------------------------- */
+    /* ── search embed ──────────────────────────────────────────────────── */
     socket.on('show-search', ({ query, platform }) => {
-      clear();
+      clearAll();
       const iframe = document.createElement('iframe');
       iframe.width  = '100%';
       iframe.height = '100%';
       iframe.allow  = 'autoplay; encrypted-media';
       iframe.allowFullscreen = true;
-
       iframe.src = platform === 'youtube'
         ? `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1&loop=1&rel=0&modestbranding=1`
         : `https://www.tiktok.com/embed/v2?query=${encodeURIComponent(query)}`;
-
       container.appendChild(iframe);
     });
 
-    /* ---------- fixed playlist (channel2) ----------------------------------- */
-    socket.on('show-playlist', (playlistId) => {
-      clear();
+    /* ── fixed playlist for channel2 ──────────────────────────────────── */
+    socket.on('show-playlist', playlistId => {
+      clearAll();
       const iframe = document.createElement('iframe');
       iframe.width  = '100%';
       iframe.height = '100%';
@@ -70,6 +76,15 @@
       iframe.allowFullscreen = true;
       iframe.src = `https://www.youtube.com/embed?listType=playlist&list=${playlistId}&autoplay=1&loop=1&rel=0&modestbranding=1`;
       container.appendChild(iframe);
+    });
+
+    /* ── random comment pop-ups ───────────────────────────────────────── */
+    socket.on('show-comment', txt => {
+      const c = document.createElement('div');
+      c.innerText = txt;
+      c.className = 'absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-white/80 text-black px-4 py-2 rounded-lg shadow-lg animate-fade';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 5000);
     });
   </script>
 </body>
