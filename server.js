@@ -66,11 +66,11 @@ io.on('connection', (socket) => {
 });
 
 /* ─────────── start server ─────────── */
-// const PORT = 3000;
-// server.listen(PORT, () => {
-//   console.log(`▶️  http://localhost:${PORT}`);
-// });
-
-http.listen(3000, '0.0.0.0', () => {
-  console.log('Server running on port 3000');
+const PORT = 3000;
+server.listen(PORT, () => {
+  console.log(`▶️  http://localhost:${PORT}`);
 });
+
+// http.listen(3000, '0.0.0.0', () => {
+//   console.log('Server running on port 3000');
+// });
