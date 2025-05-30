@@ -71,6 +71,25 @@
       <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
       <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;7</span>
     </button>
+
+    <div class="mt-10 w-full max-w-4xl">
+      <form onsubmit="sendComment(); return false;" class="flex space-x-4">
+        <input
+          id="commentInput"
+          type="text"
+          placeholder="Send a comment to the viewer..."
+          class="flex-grow p-2 rounded-lg border border-gray-300"
+          required
+        />
+        <button
+          type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+    
     <!-- add more channels if you like -->
   </div>
 

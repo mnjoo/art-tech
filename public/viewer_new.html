@@ -7,7 +7,10 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 
-<body class="bg-black flex items-center justify-center h-screen">
+
+<body class="relative bg-black flex items-center justify-center h-screen">
+  <div id="commentBox" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-white/80 text-black px-4 py-2 rounded-xl text-lg font-medium shadow-md hidden"></div>
+
   <div id="media-container" class="w-full h-full flex items-center justify-center"></div>
 
   <script>
@@ -46,7 +49,7 @@
 
       clearViewer();
       const url = list[idx];
-      const node = document.createElement(url.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'img');
+      const node = document.createElement(url.match(/\.(mp4|webm|ogg|MOV)$/i) ? 'video' : 'img');
       node.src = url;
       if (node.tagName === 'VIDEO') {
         node.autoplay = true;
@@ -88,6 +91,21 @@
       iframe.src = `https://www.youtube.com/embed?listType=playlist&list=${playlistId}&autoplay=1&loop=1&rel=1&modestbranding=1`;
       container.appendChild(iframe);
     });
+
+
+    const commentBox = document.getElementById('commentBox');
+let commentTimer;
+
+socket.on('show-comment', (text) => {
+  commentBox.textContent = text;
+  commentBox.classList.remove('hidden');
+
+  clearTimeout(commentTimer);
+  commentTimer = setTimeout(() => {
+    commentBox.classList.add('hidden');
+  }, 5000); // Hide after 5 seconds
+});
+
   </script>
 </body>
 </html>

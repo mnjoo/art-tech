@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
       fs.readdir(folder, (err, files) => {
       if (err) { console.error(err); return; }
 
-      const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|mp4|webm|ogg)$/i.test(f));
+      const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|mp4|webm|ogg|JPG|MOV)$/i.test(f));
       if (!imgs.length) { console.warn('No media in', channelName); return; }
 
       const N = 6;                                         // how many to send
@@ -63,6 +63,12 @@ io.on('connection', (socket) => {
   socket.on('search-query', ({ query, platform }) => {
     io.emit('show-search', { query, platform });           // broadcast to viewers
   });
+
+  socket.on('comment', (text) => {
+    console.log('[socket] comment:', text);
+    io.emit('show-comment', text);
+  });
+  
 });
 
 /* ─────────── start server ─────────── */

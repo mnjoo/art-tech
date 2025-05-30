@@ -2,7 +2,7 @@
 import cv2, serial, time
 from deepface import DeepFace
 
-PORT      = '/dev/cu.usbmodem141101'  # Adjust this to your serial port
+PORT      = '/dev/cu.usbmodem143101'  # Adjust this to your serial port
 BAUD      = 115200
 SEND_EVERY = 0.4 
 
@@ -22,6 +22,7 @@ cap  = cv2.VideoCapture(0)
 last_cmd, last_time = None, 0
 
 print("Press q to quit.")
+
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -37,6 +38,14 @@ while True:
 
     now = time.time()
     if cmd != last_cmd or now - last_time > SEND_EVERY:
+        if ser and ser.is_open and (cmd != last_cmd or now - last_time > SEND_EVERY):
+            try:
+                ser.write((cmd + "\n").encode())
+                print("Sent:", cmd)
+                last_cmd, last_time = cmd, now
+            except serial.SerialException as e:
+                print("Serial write error:", e)
+
         ser.write((cmd + "\n").encode())
         print("Sent:", cmd)
         last_cmd, last_time = cmd, now
