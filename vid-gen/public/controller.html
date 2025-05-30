@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Controller</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
+
+    <!-- Button 1 -->
+    <button onclick="sendLink('https://www.youtube.com/watch?v=AcQeoah5u1A')" class="bg-white rounded-2xl shadow-md p-4 flex items-center space-x-4 hover:bg-blue-50 transition w-full text-left">
+      <img src="./images/cat.png" alt="Icon 1" class="w-16 h-16 rounded-md">
+      <span class="text-lg font-semibold text-gray-800">Channel 1</span>
+    </button>
+
+    <!-- Button 2 -->
+    <button onclick="sendLink('https://www.youtube.com/watch?v=s3aKWkPwig0')" class="bg-white rounded-2xl shadow-md p-4 flex items-center space-x-4 hover:bg-blue-50 transition w-full text-left">
+      <img src="./images/cliff.png" alt="Icon 2" class="w-16 h-16 rounded-md">
+      <span class="text-lg font-semibold text-gray-800">Channel 2</span>
+    </button>
+
+    <!-- Button 3 -->
+    <button onclick="sendLink('https://www.youtube.com/watch?v=lcPTDc9vHkE')" class="bg-white rounded-2xl shadow-md p-4 flex items-center space-x-4 hover:bg-blue-50 transition w-full text-left">
+      <img src="./images/asmr.png" alt="Icon 3" class="w-16 h-16 rounded-md">
+      <span class="text-lg font-semibold text-gray-800">Channel 3</span>
+    </button>
+
+  </div>
+
+  <script>
+    const socket = io();
+    function sendLink(url) {
+      socket.emit('link-clicked', url);
+      console.log('Sent link:', url);
+    }
+  </script>
+</body>
+</html>

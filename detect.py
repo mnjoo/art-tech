@@ -16,6 +16,8 @@ while True:
         
         emotion = result[0]['dominant_emotion']
 
+        print("Detected emotion:", emotion)
+
         cv2.putText(frame, f'Emotion: {emotion}', (50, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 

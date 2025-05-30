@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><script src="/socket.io/socket.io.js"></script></head>
+<body>
+  <h1>Waiting for controller...</h1>
+  <script>
+    const socket = io();
+    socket.on('navigate', (url) => {
+      window.open(url)
+      // window.location.href = url; // Or use window.open(url) for new tab
+    });
+  </script>
+</body>
+</html>
