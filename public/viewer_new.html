@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Viewer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body class="bg-black flex items-center justify-center h-screen">
+  <div id="media-container" class="w-full h-full flex items-center justify-center"></div>
+
+  <script>
+    const socket     = io();
+    const container  = document.getElementById('media-container');
+
+    let mode = null; // "image", "slideshow", "playlist", "search"
+    let list = [], idx = 0, timer;
+
+    function clearViewer() {
+      container.innerHTML = '';
+      clearTimeout(timer);
+    }
+
+    /* ── single image support (still works) ─────────────────────────── */
+    socket.on('media-file', (url) => {
+      mode = 'image';
+      clearViewer();
+      const img = document.createElement('img');
+      img.src   = url;
+      img.className = 'max-h-screen max-w-full';
+      container.appendChild(img);
+    });
+
+    /* ── slideshow for multiple images ──────────────────────────────── */
+    socket.on('media-files', (files) => {
+      mode = 'slideshow';
+      clearViewer();
+      list = files;
+      idx  = 0;
+      nextSlide();
+    });
+
+    function nextSlide() {
+      if (mode !== 'slideshow' || !list.length) return;
+
+      clearViewer();
+      const url = list[idx];
+      const node = document.createElement(url.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'img');
+      node.src = url;
+      if (node.tagName === 'VIDEO') {
+        node.autoplay = true;
+        node.controls = false;
+      }
+      node.className = 'max-h-screen max-w-full';
+      container.appendChild(node);
+
+      idx = (idx + 1) % list.length;
+      timer = setTimeout(nextSlide, 3000); // 5 s per slide
+    }
+
+    /* ── search result embed (YT or TikTok) ─────────────────────────── */
+    socket.on('show-search', ({ query, platform }) => {
+      mode = 'search';
+      clearViewer();
+      const iframe = document.createElement('iframe');
+      iframe.width  = '100%';
+      iframe.height = '100%';
+      iframe.allow  = 'autoplay; encrypted-media';
+      iframe.allowFullscreen = true;
+
+      iframe.src = platform === 'youtube'
+        ? `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1&loop=1&rel=0&modestbranding=1`
+        : `https://www.tiktok.com/embed/v2?query=${encodeURIComponent(query)}`;
+
+      container.appendChild(iframe);
+    });
+
+    /* ── keep your playlist special-case for channel2 ──────────────── */
+    socket.on('show-playlist', (playlistId) => {
+      mode = 'playlist';
+      clearViewer();
+      const iframe = document.createElement('iframe');
+      iframe.width  = '100%';
+      iframe.height = '100%';
+      iframe.allow  = 'autoplay; encrypted-media';
+      iframe.allowFullscreen = true;
+      iframe.src = `https://www.youtube.com/embed?listType=playlist&list=${playlistId}&autoplay=1&loop=1&rel=1&modestbranding=1`;
+      container.appendChild(iframe);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Controller</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-6 space-y-6">
+
+  <!-- ── search bar ─────────────────────────────────────────────────── -->
+  <!-- <div class="w-full max-w-4xl flex gap-3">
+    <input id="searchInput"
+           class="flex-1 rounded-xl border px-4 py-2 shadow-sm focus:outline-none"
+           type="text" placeholder="Search YouTube or TikTok…" />
+    <button onclick="sendSearch()"
+            class="rounded-xl bg-blue-600 text-white px-5 py-2 font-semibold shadow hover:bg-blue-700">
+      Go
+    </button>
+  </div> -->
+
+  <!-- ── pinterest-style channel grid ────────────────────────────────── -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-4xl">
+
+    <!-- Duplicate this block per channel -->
+    <button onclick="sendLink('channel1')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel1/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;1</span>
+    </button>
+
+    <button onclick="sendLink('channel2')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel2/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;2</span>
+    </button>
+
+    <button onclick="sendLink('channel3')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel3/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;3</span>
+    </button>
+
+    <button onclick="sendLink('channel4')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel4/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;4</span>
+    </button>
+
+    <button onclick="sendLink('channel5')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel5/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;5</span>
+    </button>
+
+    <button onclick="sendLink('channel6')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel6/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;6</span>
+    </button>
+
+    <button onclick="sendLink('channel7')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel7/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;7</span>
+    </button>
+
+    <button onclick="sendLink('channel8')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel8/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;7</span>
+    </button>
+    <!-- add more channels if you like -->
+  </div>
+
+  <script>
+    const socket = io();
+
+    /* click on a channel tile */
+    function sendLink(channelName) {
+      socket.emit('link-clicked', channelName);
+      console.log('[controller] clicked:', channelName);
+    }
+
+    /* search bar — randomly pick youtube OR tiktok each time */
+    function sendSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) return;
+
+      const platforms = ['youtube', 'tiktok'];
+      const platform  = platforms[Math.floor(Math.random() * platforms.length)];
+
+      socket.emit('search-query', { query: q, platform });
+      console.log('[controller] search:', q, platform);
+    }
+  </script>
+</body>
+</html>
