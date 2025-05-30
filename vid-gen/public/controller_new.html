@@ -1,41 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Controller</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
-<!-- ... head same as before ... -->
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
-    <button onclick="sendLink('channel1')" class="bg-white rounded-2xl shadow-md p-4 flex items-center space-x-4 hover:bg-blue-50 transition w-full text-left">
-      <img src="./images/cat.png" alt="Icon 1" class="w-16 h-16 rounded-md">
-      <span class="text-lg font-semibold text-gray-800">Channel 1</span>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-6 space-y-6">
+
+  <!-- ── search bar ─────────────────────────────────────────────────── -->
+  <div class="w-full max-w-4xl flex gap-3">
+    <input id="searchInput"
+           class="flex-1 rounded-xl border px-4 py-2 shadow-sm focus:outline-none"
+           type="text" placeholder="Search YouTube or TikTok…" />
+    <button onclick="sendSearch()"
+            class="rounded-xl bg-blue-600 text-white px-5 py-2 font-semibold shadow hover:bg-blue-700">
+      Go
     </button>
-    <button onclick="sendLink('channel2')" class="bg-white rounded-2xl shadow-md p-4 flex items-center space-x-4 hover:bg-blue-50 transition w-full text-left">
-      <img src="./images/cliff.png" alt="Icon 2" class="w-16 h-16 rounded-md">
-      <span class="text-lg font-semibold text-gray-800">Channel 2</span>
+  </div>
+
+  <!-- ── pinterest-style channel grid ────────────────────────────────── -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-4xl">
+
+    <!-- Duplicate this block per channel -->
+    <button onclick="sendLink('channel1')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel1/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;1</span>
     </button>
 
-    <!-- Button 3 -->
-    <button onclick="sendLink('channel3')" class="bg-white rounded-2xl shadow-md p-4 flex items-center space-x-4 hover:bg-blue-50 transition w-full text-left">
-      <img src="./images/asmr.png" alt="Icon 3" class="w-16 h-16 rounded-md">
-      <span class="text-lg font-semibold text-gray-800">Channel 3</span>
+    <button onclick="sendLink('channel2')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel2/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;2</span>
     </button>
 
-    <!-- <button onclick="sendLink('channel1')" class="w-16 h-16 rounded-md"> Channel 1 </button>
-    <button onclick="sendLink('channel2')" class="w-16 h-16 rounded-md"> Channel 2 </button>
-    <button onclick="sendLink('channel3')" class="w-16 h-16 rounded-md"> Channel 3 </button> -->
+    <button onclick="sendLink('channel3')" class="relative group rounded-2xl overflow-hidden shadow">
+      <img src="/media/channel3/cover.jpg" class="h-40 w-full object-cover group-hover:scale-105 transition" />
+      <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+      <span class="absolute bottom-2 left-3 text-white text-lg font-semibold drop-shadow">Channel&nbsp;3</span>
+    </button>
+
+    <!-- add more channels if you like -->
   </div>
 
   <script>
     const socket = io();
+
+    /* click on a channel tile */
     function sendLink(channelName) {
       socket.emit('link-clicked', channelName);
-      console.log('Requested slideshow for:', channelName);
+      console.log('[controller] clicked:', channelName);
+    }
+
+    /* search bar — randomly pick youtube OR tiktok each time */
+    function sendSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) return;
+
+      const platforms = ['youtube', 'tiktok'];
+      const platform  = platforms[Math.floor(Math.random() * platforms.length)];
+
+      socket.emit('search-query', { query: q, platform });
+      console.log('[controller] search:', q, platform);
     }
   </script>
 </body>
-
 </html>

@@ -1,65 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Viewer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
+
 <body class="bg-black flex items-center justify-center h-screen">
   <div id="media-container" class="w-full h-full flex items-center justify-center"></div>
 
   <script>
-    const socket = io();
-    const container = document.getElementById('media-container');
-    let index = 0;
-    let mediaList = [];
+    const socket     = io();
+    const container  = document.getElementById('media-container');
 
-    function showNext() {
-      if (mediaList.length === 0) return;
+    function clear() { container.innerHTML = ''; }
 
-      const file = mediaList[index];
-      container.innerHTML = '';
-
-      let el;
-      if (file.match(/\.(jpg|jpeg|png|gif)$/)) {
-        el = document.createElement('img');
-        el.src = file;
-        el.className = 'max-h-screen max-w-full';
-      } else if (file.match(/\.(mp4|webm|ogg)$/)) {
-        el = document.createElement('video');
-        el.src = file;
-        el.className = 'max-h-screen max-w-full';
-        el.autoplay = true;
-        el.controls = false;
-      }
-
-      if (el) container.appendChild(el);
-      index = (index + 1) % mediaList.length;
-
-      setTimeout(showNext, 2000); // 5 seconds per media
-    }
-
-    socket.on('media-files', (files) => {
-      mediaList = files;
-      index = 0;
-      showNext();
+    /* ── single image support (still works) ─────────────────────────── */
+    socket.on('media-file', (url) => {
+      clear();
+      const img = document.createElement('img');
+      img.src   = url;
+      img.className = 'max-h-screen max-w-full';
+      container.appendChild(img);
     });
 
+    /* ── slideshow for multiple images ──────────────────────────────── */
+    let list = [], idx = 0, timer;
+    socket.on('media-files', (files) => {
+      list = files;
+      idx  = 0;
+      nextSlide();
+    });
+
+    function nextSlide() {
+      if (!list.length) return;
+      clear();
+      const url = list[idx];
+      const node = document.createElement(url.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'img');
+      node.src = url;
+      if (node.tagName === 'VIDEO') { node.autoplay = true; node.controls = false; }
+      node.className = 'max-h-screen max-w-full';
+      container.appendChild(node);
+      idx  = (idx + 1) % list.length;
+      clearTimeout(timer);
+      timer = setTimeout(nextSlide, 5000);   // 5 s per slide
+    }
+
+    /* ── search result embed (YT or TikTok) ─────────────────────────── */
+    socket.on('show-search', ({ query, platform }) => {
+      clear();
+      const iframe = document.createElement('iframe');
+      iframe.width  = '100%';
+      iframe.height = '100%';
+      iframe.allow  = 'autoplay; encrypted-media';
+      iframe.allowFullscreen = true;
+
+      iframe.src = platform === 'youtube'
+        ? `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1&loop=1&rel=0&modestbranding=1`
+        : `https://www.tiktok.com/embed/v2?query=${encodeURIComponent(query)}`;
+
+      container.appendChild(iframe);
+    });
+
+    /* ── keep your playlist special-case for channel2 ──────────────── */
     socket.on('show-playlist', (playlistId) => {
-    container.innerHTML = '';
-    const iframe = document.createElement('iframe');
-    iframe.width = "100%";
-    iframe.height = "100%";
-    iframe.src = `https://www.youtube.com/embed?listType=playlist&list=${playlistId}&autoplay=1&loop=1&rel=0&modestbranding=1`;
-    iframe.allow = "autoplay; encrypted-media";
-    iframe.allowFullscreen = true;
-    container.appendChild(iframe);
-  });
-  
+      clear();
+      const iframe = document.createElement('iframe');
+      iframe.width  = '100%';
+      iframe.height = '100%';
+      iframe.allow  = 'autoplay; encrypted-media';
+      iframe.allowFullscreen = true;
+      iframe.src = `https://www.youtube.com/embed?listType=playlist&list=${playlistId}&autoplay=1&loop=1&rel=0&modestbranding=1`;
+      container.appendChild(iframe);
+    });
   </script>
 </body>
 </html>
-
-
-

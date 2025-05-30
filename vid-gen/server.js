@@ -1,66 +1,60 @@
-// const express = require('express');
-// const app = express();
-// const http = require('http').createServer(app);
-// const io = require('socket.io')(http);
-
-// app.use(express.static('public'));
-
-// io.on('connection', (socket) => {
-//   console.log('a user connected');
-  
-//   socket.on('link-clicked', (url) => {
-//     console.log('Controller clicked:', url);
-//     socket.broadcast.emit('navigate', url); // Send to all other clients
-//   });
-// });
-
-
-// http.listen(3000, '0.0.0.0', () => {
-//   console.log('Server running on port 3000');
-// });
-
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const http = require('http');
+/* ─────────── dependencies ─────────── */
+const express  = require('express');
+const fs       = require('fs');
+const path     = require('path');
+const http     = require('http');
 const socketIO = require('socket.io');
 
-const app = express();
+/* ─────────── setup ─────────── */
+const app    = express();
 const server = http.createServer(app);
-const io = socketIO(server);
+const io     = socketIO(server);
 
-const mediaBase = path.join('public', 'media');
+const mediaBase = path.join(__dirname, 'public', 'media');
 
 app.use(express.static('public'));
 app.use('/media', express.static(mediaBase));
 
+/* ─────────── sockets ─────────── */
 io.on('connection', (socket) => {
-  console.log('Client connected');
+  console.log('[socket] client connected');
 
+  /* channel tile clicked --------------------------------------------------- */
   socket.on('link-clicked', (channelName) => {
-    console.log('Controller clicked:', channelName);
+    console.log('[socket] channel:', channelName);
+
+    /* hard-wired playlist for channel2 */
     if (channelName === 'channel2') {
       io.emit('show-playlist', 'PLsBtGCfy7xDYZfARrzPIyF_-YSCymi3RX');
-      console.log('Controller clicked: channel2, showing playlist');
+      return;
     }
-    else {
-      const folderPath = path.join(mediaBase, channelName);
 
-      fs.readdir(folderPath, (err, files) => {
-        if (err) {
-          console.error('Error reading media folder:', err);
-          return;
-        }
+    /* otherwise send N random images for slideshow */
+    const folder = path.join(mediaBase, channelName);
+    fs.readdir(folder, (err, files) => {
+      if (err) { console.error(err); return; }
 
-        // Build full URLs
-        const mediaUrls = files.map(file => `/media/${channelName}/${file}`);
-        io.emit('media-files', mediaUrls); // broadcast to all viewers
-      });
-    }
+      const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|mp4|webm|ogg)$/i.test(f));
+      if (!imgs.length) { console.warn('No media in', channelName); return; }
+
+      const N = 6;                                         // how many to send
+      const sample = imgs
+        .sort(() => 0.5 - Math.random())                   // shuffle
+        .slice(0, N)                                       // take N
+        .map(f => `/media/${channelName}/${f}`);           // build URLs
+
+      io.emit('media-files', sample);                      // broadcast array
+    });
   });
-  
+
+  /* search bar query ------------------------------------------------------- */
+  socket.on('search-query', ({ query, platform }) => {
+    io.emit('show-search', { query, platform });           // broadcast to viewers
+  });
 });
 
-server.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
+/* ─────────── start server ─────────── */
+const PORT = 3000;
+server.listen(PORT, () => {
+  console.log(`▶️  http://localhost:${PORT}`);
 });
